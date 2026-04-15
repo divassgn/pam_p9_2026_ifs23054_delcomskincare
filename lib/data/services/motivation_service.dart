@@ -1,21 +1,33 @@
-import '../models/motivation_model.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import '../../core/constants/api_constants.dart';
 
 class MotivationService {
-  Future<List<MotivationModel>> fetchMotivations() async {
-    // TODO: Replace with real HTTP call to ApiConstants.baseUrl
-    await Future.delayed(const Duration(milliseconds: 500));
-    return [
-      const MotivationModel(
-        id: 1,
-        quote: 'The only way to do great work is to love what you do.',
-        author: 'Steve Jobs',
-      ),
-      const MotivationModel(
-        id: 2,
-        quote: 'In the middle of every difficulty lies opportunity.',
-        author: 'Albert Einstein',
-      ),
-    ];
+
+  static Future<Map<String, dynamic>> getMotivations(int page) async {
+    final response = await http.get(
+      Uri.parse("${ApiConstants.motivations}?page=$page&per_page=10"),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception("Failed to load motivations");
+    }
+  }
+
+  static Future<void> generateMotivation(String theme, int total) async {
+    final response = await http.post(
+      Uri.parse(ApiConstants.generate),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "theme": theme,
+        "total": total
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception("Failed to generate");
+    }
   }
 }

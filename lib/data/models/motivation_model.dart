@@ -1,25 +1,19 @@
-class MotivationModel {
+class Motivation {
   final int id;
-  final String quote;
-  final String author;
+  final String text;
+  final String createdAt;
 
-  const MotivationModel({
+  Motivation({
     required this.id,
-    required this.quote,
-    required this.author,
+    required this.text,
+    required this.createdAt,
   });
 
-  factory MotivationModel.fromJson(Map<String, dynamic> json) {
-    return MotivationModel(
-      id: json['id'] as int,
-      quote: json['quote'] as String,
-      author: json['author'] as String,
+  factory Motivation.fromJson(Map<String, dynamic> json) {
+    return Motivation(
+      id: json['id'],
+      text: json['text'],
+      createdAt: json['created_at'],
     );
   }
-
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'quote': quote,
-        'author': author,
-      };
 }
