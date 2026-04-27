@@ -3,8 +3,9 @@ import 'package:provider/provider.dart';
 
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_notifier.dart';
+import 'providers/auth_provider.dart';
 import 'providers/motivation_provider.dart';
-import 'features/motivations/motivation_screen.dart';
+import 'features/auth/login_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -15,6 +16,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => MotivationProvider()),
         ChangeNotifierProvider(create: (_) => ThemeNotifier()),
       ],
@@ -25,7 +27,7 @@ class MyApp extends StatelessWidget {
             theme: AppTheme.light,
             darkTheme: AppTheme.dark,
             themeMode: theme.themeMode,
-            home: MotivationScreen(),
+            home: LoginScreen(),
           );
         },
       ),

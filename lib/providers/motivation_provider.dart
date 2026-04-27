@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import '../data/models/motivation_model.dart';
 import '../data/services/motivation_service.dart';
@@ -8,8 +7,6 @@ class MotivationProvider extends ChangeNotifier {
   int page = 1;
   bool isLoading = false;
   bool hasMore = true;
-
-  // 🔥 NEW
   bool isGenerating = false;
 
   Future<void> fetchMotivations() async {
@@ -35,12 +32,12 @@ class MotivationProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> generate(String theme, int total) async {
+  Future<void> generate(String theme, int total, String token) async {
     isGenerating = true;
     notifyListeners();
 
     try {
-      await MotivationService.generateMotivation(theme, total);
+      await MotivationService.generateMotivation(theme, total, token);
 
       motivations.clear();
       page = 1;

@@ -1,10 +1,11 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
 import '../../providers/motivation_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../core/theme/theme_notifier.dart';
+import '../auth/login_screen.dart';
 
 class MotivationScreen extends StatefulWidget {
   @override
@@ -38,13 +39,48 @@ class _MotivationScreenState extends State<MotivationScreen> {
     }
   }
 
+  void _handleLogout() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text("Logout"),
+        content: Text("Apakah kamu yakin ingin logout?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text("Batal"),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
+            ),
+            onPressed: () {
+              Navigator.pop(ctx);
+              context.read<AuthProvider>().logout();
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => LoginScreen()),
+              );
+            },
+            child: Text("Logout"),
+          ),
+        ],
+      ),
+    );
+  }
+
   void showGenerateDialog() {
     final themeController = TextEditingController();
     final totalController = TextEditingController();
 
     showDialog(
       context: context,
-      barrierDismissible: false, // 🔥 biar gak bisa close saat loading
+      barrierDismissible: false,
       builder: (dialogContext) {
         return Consumer<MotivationProvider>(
           builder: (context, provider, _) {
@@ -84,42 +120,63 @@ class _MotivationScreenState extends State<MotivationScreen> {
                 ],
               ),
               actions: [
-                // ❌ cancel hanya aktif kalau tidak loading
                 TextButton(
                   onPressed: provider.isGenerating
                       ? null
                       : () => Navigator.pop(dialogContext),
                   child: Text("Cancel"),
                 ),
-
                 ElevatedButton(
                   onPressed: provider.isGenerating
                       ? null
                       : () async {
-                    await provider.generate(
-                      themeController.text,
-                      int.parse(totalController.text),
-                    );
-                    Navigator.pop(dialogContext);
-                  },
-
-                  // 🔥 LOADING DI BUTTON
+                          final token =
+                              context.read<AuthProvider>().token ?? '';
+                          try {
+                            await provider.generate(
+                              themeController.text,
+                              int.parse(totalController.text),
+                              token,
+                            );
+                            Navigator.pop(dialogContext);
+                          } catch (e) {
+                            Navigator.pop(dialogContext);
+                            // Jika 401, paksa logout
+                            if (e.toString().contains("Sesi habis")) {
+                              context.read<AuthProvider>().logout();
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => LoginScreen()),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(e
+                                      .toString()
+                                      .replaceFirst('Exception: ', '')),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          }
+                        },
                   child: provider.isGenerating
                       ? Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(
-                        height: 18,
-                        width: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      ),
-                      SizedBox(width: 10),
-                      Text("Generating..."),
-                    ],
-                  )
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(
+                              height: 18,
+                              width: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            ),
+                            SizedBox(width: 10),
+                            Text("Generating..."),
+                          ],
+                        )
                       : Text("Generate"),
                 ),
               ],
@@ -134,6 +191,7 @@ class _MotivationScreenState extends State<MotivationScreen> {
   Widget build(BuildContext context) {
     final provider = context.watch<MotivationProvider>();
     final theme = context.watch<ThemeNotifier>();
+    final auth = context.watch<AuthProvider>();
 
     return Scaffold(
       appBar: AppBar(
@@ -147,9 +205,13 @@ class _MotivationScreenState extends State<MotivationScreen> {
             icon: Icon(Icons.dark_mode),
             onPressed: theme.toggleTheme,
           ),
+          IconButton(
+            icon: Icon(Icons.logout),
+            tooltip: "Logout",
+            onPressed: _handleLogout,
+          ),
         ],
       ),
-
       floatingActionButton: FloatingActionButton.extended(
         onPressed: showGenerateDialog,
         icon: Icon(Icons.auto_awesome),
@@ -157,7 +219,6 @@ class _MotivationScreenState extends State<MotivationScreen> {
         backgroundColor: Color(0xFF6366F1),
         foregroundColor: Colors.white,
       ),
-
       body: Stack(
         children: [
           Padding(
@@ -173,7 +234,7 @@ class _MotivationScreenState extends State<MotivationScreen> {
 
                   return Container(
                     margin:
-                    EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                     padding: EdgeInsets.all(18),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20),
@@ -194,11 +255,9 @@ class _MotivationScreenState extends State<MotivationScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-
-                        // 🔥 HEADER
                         Row(
                           mainAxisAlignment:
-                          MainAxisAlignment.spaceBetween,
+                              MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
                               "#$number",
@@ -216,9 +275,7 @@ class _MotivationScreenState extends State<MotivationScreen> {
                             ),
                           ],
                         ),
-
                         SizedBox(height: 12),
-
                         Text(
                           item.text,
                           style: TextStyle(
@@ -233,22 +290,20 @@ class _MotivationScreenState extends State<MotivationScreen> {
                 } else {
                   return provider.isLoading
                       ? Padding(
-                    padding: EdgeInsets.all(20),
-                    child: Column(
-                      children: [
-                        CircularProgressIndicator(),
-                        SizedBox(height: 8),
-                        Text("Loading..."),
-                      ],
-                    ),
-                  )
+                          padding: EdgeInsets.all(20),
+                          child: Column(
+                            children: [
+                              CircularProgressIndicator(),
+                              SizedBox(height: 8),
+                              Text("Loading..."),
+                            ],
+                          ),
+                        )
                       : SizedBox();
                 }
               },
             ),
           ),
-
-          // 🔥 OVERLAY LOADING GENERATE
           if (provider.isGenerating)
             Container(
               color: Colors.black.withValues(alpha: 0.3),
