@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_notifier.dart';
 import 'providers/auth_provider.dart';
-import 'providers/motivation_provider.dart';
+import 'providers/skincare_provider.dart';
 import 'features/auth/login_screen.dart';
 
 void main() {
@@ -17,13 +17,14 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => MotivationProvider()),
+        ChangeNotifierProvider(create: (_) => SkincareProvider()),
         ChangeNotifierProvider(create: (_) => ThemeNotifier()),
       ],
       child: Consumer<ThemeNotifier>(
         builder: (context, theme, _) {
           return MaterialApp(
             debugShowCheckedModeBanner: false,
+            title: "Delcom Skincare AI",
             theme: AppTheme.light,
             darkTheme: AppTheme.dark,
             themeMode: theme.themeMode,

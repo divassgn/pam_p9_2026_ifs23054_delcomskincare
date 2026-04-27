@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
-import '../motivations/motivation_screen.dart';
+import '../../providers/skincare_provider.dart';
+import '../skincare/skincare_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -38,9 +39,10 @@ class _LoginScreenState extends State<LoginScreen> {
     final success = await auth.login(username, password);
 
     if (success && mounted) {
+      context.read<SkincareProvider>().clear();
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => MotivationScreen()),
+        MaterialPageRoute(builder: (_) => SkincareScreen()),
       );
     }
   }
@@ -48,7 +50,6 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       body: SafeArea(
@@ -58,42 +59,52 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // ✨ Logo / Icon
-                Container(
-                  width: 80,
-                  height: 80,
-                  margin: EdgeInsets.only(bottom: 24),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                // Logo
+                Center(
+                  child: Container(
+                    width: 90,
+                    height: 90,
+                    margin: EdgeInsets.only(bottom: 24),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Color(0xFFEC4899), Color(0xFFF9A8D4)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(28),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Color(0xFFEC4899).withValues(alpha: 0.35),
+                          blurRadius: 20,
+                          offset: Offset(0, 8),
+                        )
+                      ],
                     ),
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: Icon(
-                    Icons.auto_awesome,
-                    color: Colors.white,
-                    size: 40,
+                    child: Icon(
+                      Icons.spa_rounded,
+                      color: Colors.white,
+                      size: 44,
+                    ),
                   ),
                 ),
 
                 Text(
-                  "Selamat Datang",
+                  "Delcom Skincare AI",
                   style: TextStyle(
                     fontSize: 26,
                     fontWeight: FontWeight.bold,
                   ),
+                  textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 6),
                 Text(
-                  "Silakan login untuk melanjutkan",
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey,
-                  ),
+                  "Rekomendasi produk skincare berbasis AI\nsesuai keluhan kulitmu",
+                  style: TextStyle(fontSize: 13, color: Colors.grey),
+                  textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 36),
 
-                // Username field
+                // Username
                 TextField(
                   controller: _usernameController,
                   decoration: InputDecoration(
@@ -102,12 +113,16 @@ class _LoginScreenState extends State<LoginScreen> {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(color: Color(0xFFEC4899), width: 2),
+                    ),
                   ),
                   textInputAction: TextInputAction.next,
                 ),
                 SizedBox(height: 16),
 
-                // Password field
+                // Password
                 TextField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
@@ -120,11 +135,15 @@ class _LoginScreenState extends State<LoginScreen> {
                             ? Icons.visibility_off
                             : Icons.visibility,
                       ),
-                      onPressed: () => setState(
-                          () => _obscurePassword = !_obscurePassword),
+                      onPressed: () =>
+                          setState(() => _obscurePassword = !_obscurePassword),
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(color: Color(0xFFEC4899), width: 2),
                     ),
                   ),
                   textInputAction: TextInputAction.done,
@@ -135,24 +154,20 @@ class _LoginScreenState extends State<LoginScreen> {
                 // Error message
                 if (auth.errorMessage != null)
                   Container(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    padding: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                     decoration: BoxDecoration(
                       color: Colors.red.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                          color: Colors.red.withValues(alpha: 0.4)),
+                      border: Border.all(color: Colors.red.withValues(alpha: 0.4)),
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.error_outline,
-                            color: Colors.red, size: 18),
+                        Icon(Icons.error_outline, color: Colors.red, size: 18),
                         SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             auth.errorMessage!,
-                            style: TextStyle(
-                                color: Colors.red, fontSize: 13),
+                            style: TextStyle(color: Colors.red, fontSize: 13),
                           ),
                         ),
                       ],
@@ -167,7 +182,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: ElevatedButton(
                     onPressed: auth.isLoading ? null : _handleLogin,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF6366F1),
+                      backgroundColor: Color(0xFFEC4899),
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
@@ -192,10 +207,16 @@ class _LoginScreenState extends State<LoginScreen> {
                         : Text(
                             "Login",
                             style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold),
+                                fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                   ),
+                ),
+
+                SizedBox(height: 20),
+                Text(
+                  "Demo: admin / admin123",
+                  style: TextStyle(color: Colors.grey, fontSize: 12),
+                  textAlign: TextAlign.center,
                 ),
               ],
             ),

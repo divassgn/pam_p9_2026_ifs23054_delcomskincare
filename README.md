@@ -1,6 +1,6 @@
-# pam_p9_2026_ifs23054
+# Delcom Skincare
 
-Delcom Motivation with AI Generate
+Delcom Skincare Application
 
 ## Getting Started
 

@@ -1,6 +1,6 @@
-name: pam_p9_2026_ifs23054
-description: "Delcom Motivations with AI Generate"
-publish_to: 'none'
+name: delcom_skincare
+description: "Delcom Skincare Application"
+publish_to: "none"
 version: 1.0.0+1
 
 environment:
@@ -28,8 +28,8 @@ flutter_launcher_icons:
   image_path: "assets/images/logo.png"
 
 launcher_name:
-  default: "Delcom Motivation"
-  id: "Delcom Motivation"
+  default: "Delcom Skincare"
+  id: "Delcom Skincare"
 
 flutter:
   uses-material-design: true

@@ -1,7 +1,8 @@
 class ApiConstants {
-  static const String baseUrl = "http://127.0.0.1:5000";
+  static const String baseUrl = "http://10.0.2.2:5000"; // Android emulator
+  // static const String baseUrl = "http://localhost:5000"; // Web / iOS
 
-  static const String login = "$baseUrl/auth/login";
-  static const String motivations = "$baseUrl/motivations";
-  static const String generate = "$baseUrl/motivations/generate";
+  static const String login    = "$baseUrl/auth/login";
+  static const String skincare = "$baseUrl/skincare";
+  static const String generate = "$baseUrl/skincare/generate";
 }

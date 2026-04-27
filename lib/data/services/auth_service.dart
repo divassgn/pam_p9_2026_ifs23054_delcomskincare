@@ -18,7 +18,7 @@ class AuthService {
       return AuthModel.fromJson(jsonDecode(response.body));
     } else {
       final body = jsonDecode(response.body);
-      throw Exception(body['error'] ?? 'Login gagal');
+      throw Exception(body['message'] ?? 'Login gagal');
     }
   }
 }
